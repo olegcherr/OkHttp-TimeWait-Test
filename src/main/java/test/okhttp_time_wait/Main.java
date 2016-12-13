@@ -13,6 +13,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -35,7 +36,10 @@ public class Main
 		System.out.println("Thread count: " + THREAD_COUNT);
 
 		runServer(PORT);
+
 		System.out.println("Server started");
+		System.out.println("------------------------------");
+		System.out.println("Preparing benchmark");
 
 		final AtomicInteger workerCounter = new AtomicInteger(0);
 		final AtomicInteger resultCounter = new AtomicInteger(0);
@@ -94,7 +98,10 @@ public class Main
 					.childHandler(new ChannelInitializer<SocketChannel>() {
 						@Override
 						public void initChannel(SocketChannel ch) throws Exception {
-							ch.pipeline().addLast(new TestServerHandler());
+							ch.pipeline().addLast(
+									new HttpResponseEncoder(),
+									new TestServerHandler()
+							);
 						}
 					})
 					.option(ChannelOption.SO_BACKLOG, 128)
